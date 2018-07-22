@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Weather</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  		<link href="css/materialize.css" type="text/css" rel="stylesheet"/>
+    <style>
+        tr td img{
+            width: 25px;
+            height: 25px;
+            float: left;
+            margin-right: 5px;
+        }
+        ul li button{
+            color: #fff !important;
+        }
+        ul.right li button{
+            font-size: 40px !important;
+        }
+        @media only screen and (min-width: 50px) and (max-width: 450px){
+            ul{
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+            }
+        }
+        .main_btn{
+            margin-bottom: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container center">
+        <div class="starttab">
+            <br><br><h4 class="teal-text">Click the button to get the weather of your coordinates.</h4><br>
+            <div class="error btn red lighten-4 red-text" style="display:none">Location request refused!</div><br><br>
+
+            <div class="loading" style="display:none">
+            <center><br><div class="preloader-wrapper big active"><div class="spinner-layer spinner-blue"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div><div class="spinner-layer spinner-red"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div><div class="spinner-layer spinner-yellow"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div><div class="spinner-layer spinner-green"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></center>
+            </div><br><br><br><br>
+
+            <button onclick="getLocation()" class="main_btn btn btn-large teal waves-effect waves-light"><i class="material-icons left">place</i>Get my location</button>
+        </div>
+
+        <div class="finishtab" style="display:none"><br>
+            <div class="row">
+                <div class="col l12">
+                    <button class="btn red waves-effect waves-light left" onclick="$('.finishtab').hide(); $('.starttab').show();"><i class="material-icons left">close</i>Close</button>
+                </div>
+            </div>
+            <div class="row " style="background:#26a69a; border-radius:5px; min-width:305px;">
+                <ul class="left left_ul" style="text-align:left; padding-left: 60px">
+                    <li><button class="btn btn-flat transparent"><i class="material-icons left">place</i> Urganch, UZ</button></li>
+                    <li><button class="btn btn-flat transparent"><i class="material-icons left">today</i> 22-07-2018</button></li>
+                    <li><button class="btn btn-flat transparent"><i class="material-icons left">opacity</i> 10%</button></li>
+                    <li><button class="btn btn-flat transparent"><i class="material-icons left">wb_cloudy</i> 5%</button></li>
+                </ul>
+                <ul class="right right_ul" style="text-align:left;  padding-right: 60px">
+                    <li><center><img src="/assets/images/1.jpg" width="50" height="50"></center></li>
+                    <li><button class="btn btn-flat transparent"><i class="large material-icons left">trending_up</i> 42°C</button></li>
+                    <li><button class="btn btn-flat transparent"><i class="large material-icons left">trending_down</i> 36°C</button></li>
+                </ul>
+            </div>
+            <br><h5>Extended weather for 5 days</h5><br>
+            <table class="responsive-table striped">
+                <thead>
+                    <th>Weather</th>
+                    <th>Temperature</th>
+                    <th>Date/Time</th>
+                    <th>Humidity</th>
+                    <th>Clouds</th>
+                    <th>Wind</th>
+                </thead>
+                <tbody class="table_body"></tbody>
+            </table>
+            <br><br>
+        </div>
+        
+        <div>Created by Nodirbek Sharipov</div>
+    </div>
+    
+
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+    <script>
+        var x = document.getElementById("demo");
+        var getLocation = ()=>{
+            $('.loading').show();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position)=>{
+                    showPosition(position);
+                }, ()=>{$('.error').show(); $('.loading').hide();}, {enableHighAccuracy: true});
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        };
+    
+        var showPosition = (position)=>{
+            $('.error').hide();
+            
+            var apiKey = '9d39edd3f2801775295a6cc61a2d012c';
+            $.get('https://api.openweathermap.org/data/2.5/forecast?lat='+position.coords.latitude+'&lon='+position.coords.longitude+'&appid='+apiKey+'&type=accurate&mode=json&units=metric', {}, (data, status)=>{
+                var city    = data.city.name+', '+data.city.country,
+                    min_temp= data.list[0].main.temp_min+'°C',
+                    max_temp= data.list[0].main.temp_max+'°C',
+                    humidity= data.list[0].main.humidity+'%',
+                    info    = data.list[0].weather[0].main,
+                    clouds  = data.list[0].clouds.all+'%',
+                    wind    = data.list[0].wind.speed+' m/s',
+                    datee    = data.list[0].dt_txt,
+                    icon    = 'http://openweathermap.org/img/w/'+data.list[0].weather[0].icon+'.png';
+
+                    $('.left_ul').html('<li><button class="btn btn-flat transparent"><i class="material-icons left">place</i>'+city+'</button></li><li><button class="btn btn-flat transparent"><i class="material-icons left">today</i>'+datee.split(" ")[0]+'</button></li><li><button class="btn btn-flat transparent"><i class="material-icons left">opacity</i>'+humidity+'</button></li><li><button class="btn btn-flat transparent"><i class="material-icons left">wb_cloudy</i>'+clouds+'</button></li>');
+                    $('.right_ul').html('<li><center><img src="'+icon+'" width="50" height="50"></center></li><br><li><button class="btn btn-flat transparent">'+max_temp+'</button></li>');
+
+                    $('.starttab').hide();
+                    $('.finishtab').show();
+                    $('.loading').hide();
+                    $('.table_body').html('');
+                    data.list.forEach(list=>{
+                        $('.table_body').append('<tr><td><img src="http://openweathermap.org/img/w/'+list.weather[0].icon+'.png">'+list.weather[0].main+'</td><td>'+list.main.temp_max+'°C</td><td>'+list.dt_txt.substring(0, 16)+'</td><td>'+list.main.humidity+'%</td><td>'+list.clouds.all+'%</td><td>'+list.wind.speed+' m/s</td></tr>');
+                    });
+                console.log(data);
+            });
+        };
+    </script>
+
+</body>
+</html>​
